@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {RootState} from './src/store/rootReducer';
+import {useSelector} from 'react-redux';
 import SignIn from './src/pages/SignIn';
 import SignUp from './src/pages/SignUp';
 import Restaurant from './src/pages/Restaurant';
@@ -11,10 +13,15 @@ import Settings from './src/pages/Settings';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function AppInner() {
-  const isLogedIn = true;
+export type RootStackParamList = {
+  SignIn: undefined;
+  SignUp: undefined;
+};
 
-  return isLogedIn ? (
+function AppInner() {
+  const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
+
+  return isLoggedIn ? (
     <Tab.Navigator>
       <Tab.Screen
         name="맛집"
