@@ -1,6 +1,14 @@
 {
-  "logIn": {
+  "signin": {
     "email": "test1234@gmail.com",
-    "password": "test1234!"
-  }
+    "password": "root1234!"
+  },
+  "user": [
+    {
+      "email": "test1234@gmail.com",
+      "name": "정재범",
+      "password": "root1234!",
+      "id": 1
+    }
+  ]
 }

@@ -13,7 +13,9 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useAppDispatch} from '../store/configureStore';
 import DismissKeyboardView from './components/DismissKeyboardView';
 import {RootStackParamList} from '../../AppInner';
-import {logIn} from '../api/userApi';
+import axios, {AxiosError} from 'axios';
+import Config from 'react-native-config';
+import userSlice from '../slices/user';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
@@ -42,11 +44,42 @@ function SignIn({navigation}: SignInScreenProps) {
     if (!password || !password.trim()) {
       return Alert.alert('알림', '비밀번호를 입력해주세요.');
     }
-    setLoading(true);
+    try {
+      setLoading(true);
+      const getSignUpRes = await axios.get(`${Config.API_URL}/user`);
 
-    dispatch(logIn({email, password})).then(() => {
+      const findUser = getSignUpRes.data.find(user => user.email === email);
+      console.log({findUser});
+      if (findUser !== undefined) {
+        if (findUser.password !== password) {
+          throw new Error('비밀번호가 틀립니다.');
+        }
+        const postSignInRes = await axios.post(`${Config.API_URL}/signin`, {
+          email,
+          password,
+        });
+        console.log(postSignInRes.data);
+        Alert.alert('알림', '로그인 되었습니다.');
+        dispatch(
+          userSlice.actions.setUser({
+            name: postSignInRes.data.name,
+            email: postSignInRes.data.email,
+            isLoggedIn: true,
+          }),
+        );
+      } else {
+        throw new Error('회원가입이 필요합니다.');
+      }
+    } catch (error) {
+      const errorResponse = error as AxiosError;
+      Alert.alert('알림', errorResponse.message);
+    } finally {
       setLoading(false);
-    });
+    }
+
+    // dispatch(logIn({email, password})).then(() => {
+    //   setLoading(false);
+    // });
   }, [dispatch, loading, email, password]);
 
   const toSignUp = useCallback(() => {
